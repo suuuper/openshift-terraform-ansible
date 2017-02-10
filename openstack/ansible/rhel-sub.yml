@@ -17,6 +17,15 @@
     - name: add jboss.org mvn repository to etc hosts (5)
       lineinfile: dest=/etc/hosts state=present insertafter=EOF line='209.132.182.33   repository.jboss.org'
     - name: subscribe RHN
-      redhat_subscription: state=present username='{{ username }}' password='{{ password }}' autosubscribe=true pool='{{ pool_id }}'
+      redhat_subscription: 
+          state: present 
+          username: "{{ username }}" 
+          password: "{{ password }}" 
+          autosubscribe: true 
+          pool: "{{ pool_id }}"
+
+    - name: Subscribe
+      shell: subscription-manager attach --pool="{{ pool_id }}"
+
     - name: disable all repos by default
       shell: subscription-manager repos --disable="*"

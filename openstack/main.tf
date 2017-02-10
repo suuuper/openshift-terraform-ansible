@@ -7,6 +7,7 @@ variable "openstack_availability_zone" {}
 variable "openstack_region" {}
 variable "openstack_keypair" {}
 variable "num_nodes" { default = "2"}
+variable "master_num_nodes" { default = "3"}
 variable "master_image_id" {}
 variable "master_instance_size" {}
 variable "node_image_id" {}
@@ -107,49 +108,52 @@ resource "openstack_compute_secgroup_v2" "os3-sec-group" {
 }
 
 resource "openstack_compute_floatingip_v2" "os3-master-floatip" {
-  region = "${var.openstack_region}"
-  pool = "os1_public"
+  count = "${var.master_num_nodes}"
+  # region = "${var.openstack_region}"
+  pool = "ExternalNetwork-Shared"
 }
 
 resource "openstack_compute_floatingip_v2" "os3-node-floatip" {
   count = "${var.num_nodes}"
-  region = "${var.openstack_region}"
-  pool = "os1_public"
+  # region = "${var.openstack_region}"
+  pool = "ExternalNetwork-Shared"
 }
 
 
 resource "openstack_blockstorage_volume_v1" "master-docker-vol" {
-  name = "mastervol"
-  size = 75
+  count = "${var.master_num_nodes}"
+  name = "mastervol${count.index}"
+  size = 5 
 }
 
 resource "openstack_blockstorage_volume_v1" "node-docker-vol" {
   count = "${var.num_nodes}"
-  name = "${concat("node-docker-vol", count.index)}"
-  size = 75
+  name = "${format("%.24s", "node-docker-vol${count.index}")}"
+  size = 10
 }
 
 resource "openstack_compute_instance_v2" "ose-master" {
-  name = "os3-master"
-  region = "${var.openstack_region}"
+  name = "${"os3-master${count.index}"}"
+  count = "${var.master_num_nodes}"
+  # region = "${var.openstack_region}"
   image_id = "${var.master_image_id}"
   flavor_name = "${var.master_instance_size}"
   availability_zone = "${var.openstack_availability_zone}"
   key_pair = "${var.openstack_keypair}"
   security_groups = ["default", "os3-sec-group"]
-  floating_ip = "${openstack_compute_floatingip_v2.os3-master-floatip.address}"
+  floating_ip = "${element(openstack_compute_floatingip_v2.os3-master-floatip.*.address, count.index)}"
   metadata {
     ssh_user = "cloud-user"
   }
   volume {
-    volume_id = "${openstack_blockstorage_volume_v1.master-docker-vol.id}"
+    volume_id = "${element(openstack_blockstorage_volume_v1.master-docker-vol.*.id, count.index)}"
   }
 }
 
 resource "openstack_compute_instance_v2" "ose-node" {
   count = "${var.num_nodes}"
-  name = "${concat("os3-node", count.index)}"
-  region = "${var.openstack_region}"
+  name = "${"os3-node${count.index}"}"
+  # region = "${var.openstack_region}"
   image_id = "${var.node_image_id}"
   flavor_name = "${var.node_instance_size}"
   availability_zone = "${var.openstack_availability_zone}"

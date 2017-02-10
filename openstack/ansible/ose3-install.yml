@@ -1,0 +1,47 @@
+- hosts: all
+  sudo: yes
+  tasks:
+  - name: Install openshift-utils
+    yum: name=atomic-openshift-utils state=present
+
+  - name: Install exclude packages
+    yum: name={{item}} state=present
+    with_items:
+    - atomic-openshift-excluder
+    - atomic-openshift-docker-excluder
+    - NetworkManager
+
+  - name: Unexclude atomic during the installation
+    shell: "atomic-openshift-excluder unexclude"
+
+  - name: Copy inventory file to target
+    copy: dest=/root/ src=../enterprise-inventory owner=root group=root mode=0600
+
+  # Idempotent way to build a /etc/hosts file with Ansible using your Ansible hosts inventory for a source.
+  # Will include all hosts the playbook is run on.
+  # Inspired from http://xmeblog.blogspot.com/2013/06/ansible-dynamicaly-update-etchosts.html
+
+  - name: "Build hosts file"
+    lineinfile: 
+      dest: /etc/hosts 
+      insertafter: EOF
+#      regexp: '.*{{ item }}$' 
+      line: "{{ hostvars[item].ansible_default_ipv4.address }} {{item}}" 
+      state: present
+    when: hostvars[item].ansible_default_ipv4.address is defined
+    with_items: groups['all']
+
+  - name: create .ssh for root
+    file: state=directory dest=/root/.ssh/ owner=root group=root mode=0700
+
+  - name: add authorized keys file
+    copy: dest=/root/.ssh/authorized_keys src=id_rsa.pub owner=root group=root mode=0600
+
+  - name: add authorized keys file
+    copy: dest=/root/.ssh/ src={{item}} owner=root group=root mode=0600
+    with_items:
+    - id_rsa
+    - id_rsa.pub
+
+ 
+
