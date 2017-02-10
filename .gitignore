@@ -7,3 +7,4 @@ rhel-sub-vars.yml
 use-*
 .idea
 *.iml
+*.retry

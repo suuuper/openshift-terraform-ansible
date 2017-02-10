@@ -49,6 +49,7 @@ Create a file named `terraform.tfvars` in the `openstack` directory of this repo
     openstack_region = "region"
     openstack_keypair = "keypair"
     num_nodes = "1"
+    master_num_nodes = "1"
     
     # update these to the image IDs you want to use in your infra
     master_image_id = "6b7a5472-5187-4e38-bce4-9d6d2a11a8e7"
