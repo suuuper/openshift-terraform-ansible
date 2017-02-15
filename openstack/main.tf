@@ -58,6 +58,18 @@ resource "openstack_compute_secgroup_v2" "os3-sec-group" {
     cidr = "0.0.0.0/0"
   }
   rule {
+    from_port = 2379
+    to_port = 2379
+    ip_protocol = "tcp"
+    cidr = "0.0.0.0/0"
+  }
+  rule {
+    from_port = 2380
+    to_port = 2380
+    ip_protocol = "tcp"
+    cidr = "0.0.0.0/0"
+  }
+  rule {
     from_port = 4001
     to_port = 4001
     ip_protocol = "tcp"
@@ -133,7 +145,7 @@ resource "openstack_blockstorage_volume_v1" "node-docker-vol" {
 }
 
 resource "openstack_compute_instance_v2" "ose-master" {
-  name = "${"os3-master${count.index}"}"
+  name = "os3-master${count.index}"
   count = "${var.master_num_nodes}"
   # region = "${var.openstack_region}"
   image_id = "${var.master_image_id}"
@@ -152,7 +164,7 @@ resource "openstack_compute_instance_v2" "ose-master" {
 
 resource "openstack_compute_instance_v2" "ose-node" {
   count = "${var.num_nodes}"
-  name = "${"os3-node${count.index}"}"
+  name = "os3-node${count.index}"
   # region = "${var.openstack_region}"
   image_id = "${var.node_image_id}"
   flavor_name = "${var.node_instance_size}"

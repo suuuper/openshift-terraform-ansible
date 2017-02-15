@@ -2,34 +2,44 @@
 [OSEv3:children]
 masters
 nodes
+etcd
 
 # Set variables common for all OSEv3 hosts
 [OSEv3:vars]
 # SSH user, this user should allow ssh based auth without requiring a password
-ansible_ssh_user=cloud-user
+ansible_ssh_user=root
 
 # If ansible_ssh_user is not root, ansible_sudo must be set to true
 ansible_sudo=true
+deployment_type=openshift-enterprise
+containerized=false
 
-product_type=openshift
-deployment_type=enterprise
-#openshift_pkg_version=-1.0.5
-#openshift_pkg_version=-3.0.1.0
-openshift_master_cluster_public_hostname=master.fuse.osecloud.com
+openshift_master_cluster_method=native
+openshift_master_cluster_public_hostname=os3-master0.ose
 
 
 # uncomment the following to enable htpasswd authentication; defaults to DenyAllPasswordIdentityProvider
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/openshift/openshift-passwd'}]
-osm_default_subdomain=apps.fuse.osecloud.com
-#osm_default_subdomain=apps.fabric8.osecloud.com
+openshift_master_default_subdomain=master.ose
+
+
 
 # host group for masters
 [masters]
-master.rhcloud.com openshift_public_hostname=master.fuse.osecloud.com
+172.23.0.12  openshift_public_hostname=os3-master0.ose
+172.23.0.13  openshift_public_hostname=os3-master1.ose
+172.23.0.16  openshift_public_hostname=os3-master2.ose
+
+[etcd]
+172.23.0.12  
+172.23.0.13  
+172.23.0.16  
 
 # host group for nodes, includes region info
 [nodes]
-master.rhcloud.com openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
-node0.rhcloud.com openshift_node_labels="{'region': 'primary', 'zone': 'east'}"
+172.23.0.14  openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
+172.23.0.15  openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
 
+[baremetal]
+156.54.176.[80:82] openshift_public_hostname=os3-master[0:2].ose
 
