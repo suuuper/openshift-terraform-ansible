@@ -22,6 +22,7 @@ import argparse
 from collections import defaultdict
 from functools import wraps
 import json
+import sys
 import os
 import re
 
@@ -60,7 +61,7 @@ def iterhosts(resources):
     '''yield host tuples of (name, attributes, groups)'''
     for module_name, key, resource in resources:
         resource_type, name = key.split('.')[:2]
-        print("Trying to parse", resource_type, name)
+        print("Trying to parse", resource_type, name, file=sys.stderr)
         resource['group_name'] = name
         try:
             parser = PARSERS[resource_type]
@@ -742,8 +743,7 @@ def main():
                         action='store_true',
                         help='with --list, exclude hostvars')
     default_root = os.environ.get('TERRAFORM_STATE_ROOT',
-                                  os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                                               '..', '..', )))
+                                  os.path.abspath(os.path.join(os.path.dirname(__file__))))
     parser.add_argument('--root',
                         default=default_root,
                         help='custom root to search for `.tfstate`s in')

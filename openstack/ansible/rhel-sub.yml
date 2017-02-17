@@ -1,5 +1,5 @@
 ---
-- hosts: baremetal
+- hosts: publicly_routable
   sudo: yes
   vars_files:
       - rhel-sub-vars.yml     

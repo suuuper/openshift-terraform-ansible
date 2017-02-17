@@ -1,4 +1,4 @@
-- hosts: baremetal
+- hosts: publicly_routable
   sudo: yes
   tasks:
   - name: Install openshift-utils
@@ -27,7 +27,7 @@
       line:   "{{ item }} {{ hostvars[item].ansible_hostname }} {{hostvars[item].ansible_hostname}}.ose"
       state: present
     with_items: |
-      {{ groups['baremetal'] }}
+      {{ groups['publicly_routable'] }}
 
   - name: create .ssh for root
     file: state=directory dest=/root/.ssh/ owner=root group=root mode=0700

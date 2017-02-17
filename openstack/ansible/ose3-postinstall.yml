@@ -1,0 +1,10 @@
+- hosts: publicly_routable
+  sudo: yes
+  tasks:
+  - name: add sample user
+    htpasswd:
+      path: /etc/openshift/openshift-passwd
+      name: rpolli
+      password: secret-change-91231
+ 
+

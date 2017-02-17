@@ -1,5 +1,5 @@
 ---
-- hosts: baremetal
+- hosts: publicly_routable
   sudo: yes
   tasks:
     - name: disable all repos by default
