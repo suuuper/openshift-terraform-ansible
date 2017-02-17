@@ -2,7 +2,7 @@
 [OSEv3:children]
 masters
 nodes
-etcd
+#etcd
 
 # Set variables common for all OSEv3 hosts
 [OSEv3:vars]
@@ -14,32 +14,40 @@ ansible_sudo=true
 deployment_type=openshift-enterprise
 containerized=false
 
-openshift_master_cluster_method=native
+#openshift_master_cluster_method=native
 openshift_master_cluster_public_hostname=os3-master0.ose
 
 
 # uncomment the following to enable htpasswd authentication; defaults to DenyAllPasswordIdentityProvider
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/openshift/openshift-passwd'}]
 openshift_master_default_subdomain=master.ose
-
+openshift_docker_options=' --insecure-registry 172.30.0.0/16 '
 
 
 # host group for masters
 [masters]
-172.23.0.12  openshift_public_hostname=os3-master0.ose
-172.23.0.13  openshift_public_hostname=os3-master1.ose
-172.23.0.16  openshift_public_hostname=os3-master2.ose
+172.23.0.28   openshift_public_hostname=os3-master0.ose
+#172.23.0.26    openshift_public_hostname=os3-master1
+#172.23.0.27     openshift_public_hostname=os3-master2
+#172.23.0.23             os3-lb
 
-[etcd]
-172.23.0.12  
-172.23.0.13  
-172.23.0.16  
+#[etcd]
+#172.23.0.18  
+#172.23.0.17  
+#172.23.0.20
 
 # host group for nodes, includes region info
 [nodes]
-172.23.0.14  openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
-172.23.0.15  openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
+172.23.0.24  openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
+172.23.0.25  openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
 
 [baremetal]
-156.54.176.[80:82] openshift_public_hostname=os3-master[0:2].ose
+156.54.176.96
+156.54.176.91
+156.54.176.92
+156.54.176.95
+156.54.176.94
 
+[baremetal:vars]
+ansible_ssh_user=cloud-user
+ansbile_sudo=true

@@ -1,5 +1,6 @@
 #!/bin/bash
 # ./run.sh --private-key=~/.ssh/redhat_rsa
+dynamic(){
 terraform apply
 
 sleep 15
@@ -13,4 +14,8 @@ ansible-playbook -i ../terraform.py ./ansible/rhel-sub.yml $@
 ansible-playbook -i ../terraform.py ./ansible/ose3-prep-nodes.yml $@
 ansible-playbook -i ../terraform.py ./ansible/ose3-install.yml $@
 
-# ssh master-node sudo -H ansible-playbook -i enterprise-inventory  /usr/share/ansible/openshift-ansible/playbooks/byo/config.yml
+}
+ansible-playbook -i enterprise-inventory ./ansible/rhel-sub.yml $@
+ansible-playbook -i enterprise-inventory ./ansible/ose3-prep-nodes.yml $@
+ansible-playbook -i enterprise-inventory ./ansible/ose3-install.yml $@
+ssh cloud-user@156.54.176.94  sudo -H ansible-playbook -i enterprise-inventory  /usr/share/ansible/openshift-ansible/playbooks/byo/config.yml

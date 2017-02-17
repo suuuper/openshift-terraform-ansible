@@ -119,6 +119,12 @@ resource "openstack_compute_secgroup_v2" "os3-sec-group" {
   }
 }
 
+
+resource "openstack_compute_floatingip_v2" "os3-lb-floatip" {
+  # region = "${var.openstack_region}"
+  pool = "ExternalNetwork-Shared"
+}
+
 resource "openstack_compute_floatingip_v2" "os3-master-floatip" {
   count = "${var.master_num_nodes}"
   # region = "${var.openstack_region}"
@@ -142,6 +148,21 @@ resource "openstack_blockstorage_volume_v1" "node-docker-vol" {
   count = "${var.num_nodes}"
   name = "${format("%.24s", "node-docker-vol${count.index}")}"
   size = 10
+}
+
+
+resource "openstack_compute_instance_v2" "ose-lb" {
+  name = "os3-lb"
+  count = 1
+  image_id = "${var.master_image_id}"
+  flavor_name = "${var.master_instance_size}"
+  availability_zone = "${var.openstack_availability_zone}"
+  key_pair = "${var.openstack_keypair}"
+  security_groups = ["default", "os3-sec-group"]
+  floating_ip = "${element(openstack_compute_floatingip_v2.os3-master-floatip.*.address, count.index)}"
+  metadata {
+    ssh_user = "cloud-user"
+  }
 }
 
 resource "openstack_compute_instance_v2" "ose-master" {
