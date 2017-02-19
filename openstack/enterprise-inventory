@@ -14,15 +14,19 @@ infra
 # Set variables common for all OSEv3 hosts
 [OSEv3:vars]
 # SSH user, this user should allow ssh based auth without requiring a password
+# If ansible_ssh_user is not root, ansible_sudo must be set to true
+ansible_sudo=true
 ansible_ssh_user=root
 host_key_checking = False
 retry_files_enabled = false
 
-# If ansible_ssh_user is not root, ansible_sudo must be set to true
-ansible_sudo=true
+# Deployment type
 deployment_type=openshift-enterprise
 containerized=false
 
+#
+# BEWARE: Those settings are *all* required, otherwise masters can't authenticate between others.
+#
 openshift_master_default_subdomain=master.ose
 openshift_master_cluster_method=native
 openshift_master_cluster_hostname=os3-lb
@@ -32,16 +36,18 @@ openshift_master_cluster_public_hostname=os3-lb.ose
 # uncomment the following to enable htpasswd authentication; defaults to DenyAllPasswordIdentityProvider
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/openshift/openshift-passwd'}]
 
-# Docker
+# Enable insecure docker registry.
 openshift_docker_options=' --insecure-registry 172.30.0.0/16 '
 
 # enable ntp on masters to ensure proper failover
 openshift_clock_enabled=true
 
 
+# The lb is the entrypoint for the interface and api
 [lb]
 os3-lb     openshift_public_hostname=os3-lb   openshift_hostname=os3-lb
 
+# Router and Registry hosts.
 [infra]
 localhost
 
@@ -55,6 +61,7 @@ os3-master2    openshift_public_hostname=os3-master2  openshift_hostname=os3-mas
 openshift_schedulable=true
 openshift_router_selector="region=infra"
 
+# Use master nodes for etcd.
 [etcd]
 os3-master[0:2]
 
