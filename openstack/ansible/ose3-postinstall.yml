@@ -5,6 +5,6 @@
     htpasswd:
       path: /etc/openshift/openshift-passwd
       name: rpolli
-      password: secret-change-91231
+      password: secret-6-change
  
 

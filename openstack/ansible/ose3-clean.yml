@@ -1,0 +1,23 @@
+- hosts: publicly_routable
+  sudo: yes
+  tasks:
+  - name: Install openshift-utils
+    yum: name={{item}} state=absent
+    with_items:
+    - openshift
+    - openshift-*
+    - etcd
+    - docker
+
+  - name: Remove files
+    file: dest={{item}}  state=absent
+    with_items:
+    - /etc/origin 
+    - /var/lib/openshift 
+    - /etc/etcd 
+    - /var/lib/etcd 
+    - /etc/sysconfig/atomic-openshift* 
+    - /etc/sysconfig/docker* 
+    - /root/.kube/config 
+    - /etc/ansible/facts.d 
+    - /usr/share/openshift

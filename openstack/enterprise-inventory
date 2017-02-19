@@ -1,8 +1,15 @@
+#
+# Openshift Ansible File, run with:
+#    ansible-playbook -i enterprise-inventory /usr/share/ansible/openshift-ansible/playbooks/byo/config.yml
+#
+
 # Create an OSEv3 group that contains the masters and nodes groups
 [OSEv3:children]
 masters
 nodes
 etcd
+lb
+infra
 
 # Set variables common for all OSEv3 hosts
 [OSEv3:vars]
@@ -18,7 +25,8 @@ containerized=false
 
 openshift_master_default_subdomain=master.ose
 openshift_master_cluster_method=native
-openshift_master_cluster_public_hostname=os3-master.ose
+openshift_master_cluster_hostname=os3-lb
+openshift_master_cluster_public_hostname=os3-lb.ose
 
 
 # uncomment the following to enable htpasswd authentication; defaults to DenyAllPasswordIdentityProvider
@@ -27,30 +35,41 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Docker
 openshift_docker_options=' --insecure-registry 172.30.0.0/16 '
 
+# enable ntp on masters to ensure proper failover
+openshift_clock_enabled=true
+
+
+[lb]
+os3-lb     openshift_public_hostname=os3-lb   openshift_hostname=os3-lb
+
+[infra]
+localhost
 
 # host group for masters
 [masters]
-172.23.0.28   openshift_public_hostname=os3-master0.ose
-172.23.0.26   openshift_public_hostname=os3-master1.ose
-172.23.0.27   openshift_public_hostname=os3-master2.ose
+os3-master0    openshift_public_hostname=os3-master0  openshift_hostname=os3-master0
+os3-master1    openshift_public_hostname=os3-master1  openshift_hostname=os3-master1
+os3-master2    openshift_public_hostname=os3-master2  openshift_hostname=os3-master2
 
-[lb]
-172.23.0.23   os3-lb
+[masters:vars]
+openshift_schedulable=true
+openshift_router_selector="region=infra"
 
 [etcd]
-172.23.0.18
-172.23.0.17
-172.23.0.20
+os3-master[0:2]
 
 # host group for nodes, includes region info
 [nodes]
-172.23.0.24  openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
-172.23.0.25  openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
+os3-master[0:2]  openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
+os3-node0  openshift_node_labels="{'region': 'primary', 'zone': 'east'}"
+os3-node1  openshift_node_labels="{'region': 'primary', 'zone': 'west'}"
 
-[baremetal]
-156.54.176.96
-156.54.176.91
-156.54.176.92
-156.54.176.95
-156.54.176.94
 
+[dns]
+os3-lb
+
+# etcdctl -C \
+#    https://etcd1.example.com:2379,https://etcd2.example.com:2379,https://etcd3.example.com:2379 \
+#    --ca-file=/etc/origin/master/master.etcd-ca.crt \
+#    --cert-file=/etc/origin/master/master.etcd-client.crt \
+#    --key-file=/etc/origin/master/master.etcd-client.key cluster-health

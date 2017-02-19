@@ -17,17 +17,29 @@
   - name: Copy inventory file to target
     copy: dest=/root/ src=../enterprise-inventory owner=root group=root mode=0600
 
-  # Idempotent way to build a /etc/hosts file with Ansible using your Ansible hosts inventory for a source.
-  # Will include all hosts the playbook is run on.
-  # Inspired from http://xmeblog.blogspot.com/2013/06/ansible-dynamicaly-update-etchosts.html
-  - name: "Build hosts file"
+  - name: "Cleanup hostfile"
+    lineinfile:
+       dest: /etc/hosts
+       state: absent
+       regexp: "^.*os3-.*$"
+
+  - name: "Add private ips"
     lineinfile: 
-      dest: /etc/hosts 
+      dest: /etc/hosts
       insertafter: EOF
-      line:   "{{ item }} {{ hostvars[item].ansible_hostname }} {{hostvars[item].ansible_hostname}}.ose"
+      line:   "{{ hostvars[item].private_ipv4 }} {{ hostvars[item].ansible_hostname }}"
       state: present
     with_items: |
-      {{ groups['publicly_routable'] }}
+      {{ groups['all'] }}
+
+  - name: "Add public ips"
+    lineinfile:
+      dest: /etc/hosts
+      insertafter: EOF
+      line:   "{{ hostvars[item].public_ipv4 }} {{hostvars[item].ansible_hostname}}.ose"
+      state: present
+    with_items: |
+      {{ groups['all'] }}
 
   - name: create .ssh for root
     file: state=directory dest=/root/.ssh/ owner=root group=root mode=0700
@@ -40,12 +52,4 @@
     with_items:
     - id_rsa
     - id_rsa.pub
-
-  - name: add sample user
-    htpasswd:
-      path: /etc/openshift/openshift-passwd
-      name: rpolli
-      password: secret-change-91231
-      crypt_scheme: md5_crypt
- 
 

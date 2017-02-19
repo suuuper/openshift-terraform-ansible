@@ -22,6 +22,7 @@
           - iptables-services
           - bridge-utils
           - tmux
+          - telnet
 
     - name: Update all yum packages
       yum: name=* state=latest

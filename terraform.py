@@ -61,7 +61,7 @@ def iterhosts(resources):
     '''yield host tuples of (name, attributes, groups)'''
     for module_name, key, resource in resources:
         resource_type, name = key.split('.')[:2]
-        print("Trying to parse", resource_type, name, file=sys.stderr)
+        # print("Trying to parse", resource_type, name, file=sys.stderr)
         resource['group_name'] = name
         try:
             parser = PARSERS[resource_type]
@@ -182,7 +182,7 @@ def triton_machine(resource, module_name):
 
     # private IPv4
     for ip in attrs['ips']:
-        if ip.startswith('10') or ip.startswith('192.168'): # private IPs
+        if ip.startswith('10') or ip.startswith('192.168'):  # private IPs
             attrs['private_ipv4'] = ip
             break
 
@@ -308,6 +308,11 @@ def openstack_host(resource, module_name):
     raw_attrs = resource['primary']['attributes']
     name = raw_attrs['name']
     groups = []
+
+    # fix eventual inconsistencies in terraform.tfstate
+    if 'network.0.floating_ip' in raw_attrs:
+        raw_attrs['access_ip_v4'] = raw_attrs['network.0.floating_ip']
+
 
     attrs = {
         'access_ip_v4': raw_attrs['access_ip_v4'],
