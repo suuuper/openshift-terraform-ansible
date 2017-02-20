@@ -65,7 +65,7 @@ openshift_router_selector="region=infra"
 [etcd]
 os3-master[0:2]
 
-# host group for nodes, includes region info
+# host group for nodes, includes region info. Deploy infra on master nodes.
 [nodes]
 os3-master[0:2]  openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
 os3-node0  openshift_node_labels="{'region': 'primary', 'zone': 'east'}"

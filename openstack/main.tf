@@ -40,6 +40,12 @@ resource "openstack_compute_secgroup_v2" "os3-sec-group" {
     cidr = "0.0.0.0/0"
   }
   rule {
+    from_port = 8053
+    to_port = 8053
+    ip_protocol = "tcp"
+    cidr = "0.0.0.0/0"
+  }
+  rule {
     from_port = 80
     to_port = 80
     ip_protocol = "tcp"
@@ -102,6 +108,12 @@ resource "openstack_compute_secgroup_v2" "os3-sec-group" {
   rule {
     from_port = 53
     to_port = 53
+    ip_protocol = "udp"
+    cidr = "0.0.0.0/0"
+  }
+  rule {
+    from_port = 8053
+    to_port = 8053
     ip_protocol = "udp"
     cidr = "0.0.0.0/0"
   }
