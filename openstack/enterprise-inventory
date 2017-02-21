@@ -65,11 +65,13 @@ openshift_router_selector="region=infra"
 [etcd]
 os3-master[0:2]
 
-# host group for nodes, includes region info. Deploy infra on master nodes.
+# host group for nodes, includes region info and openshift_ip. 
+#  - deploy infra on master nodes;
+#  - specify openshift_ip and don't use floating_ips or nodes won't be able to communicate via openshift_sdn
 [nodes]
 os3-master[0:2]  openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
-os3-node0  openshift_node_labels="{'region': 'primary', 'zone': 'east'}"
-os3-node1  openshift_node_labels="{'region': 'primary', 'zone': 'west'}"
+os3-node0  openshift_node_labels="{'region': 'primary', 'zone': 'east'}" openshift_ip=172.23.0.20
+os3-node1  openshift_node_labels="{'region': 'primary', 'zone': 'west'}" openshift_ip=172.23.0.21
 
 
 [dns]
