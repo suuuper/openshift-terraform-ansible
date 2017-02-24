@@ -4,6 +4,9 @@
 
 ssh-keygen -trsa -b2048 -i ansible/id_rsa
 
+## Configure terraform.tfvars
+
+see ../Readme.md
 
 
 ## Change registry ip
