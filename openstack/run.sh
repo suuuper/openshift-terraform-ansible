@@ -11,9 +11,9 @@ sleep 120
 }
 
 prepare(){
-ansible-playbook -i ../terraform.py ./ansible/rhel-sub.yml $@ &&
-ansible-playbook -i ../terraform.py ./ansible/ose3-prep-nodes.yml $@ &&
-ansible-playbook -i ../terraform.py ./ansible/ose3-install.yml $@ 
+ansible-playbook  ./ansible/rhel-sub.yml $@ &&
+ansible-playbook  ./ansible/ose3-prep-nodes.yml $@ &&
+ansible-playbook  ./ansible/ose3-install.yml $@ 
 
 echo "Packages installed successfully!"
 echo "Now login to the os3-lb node and run the ansible playbook"

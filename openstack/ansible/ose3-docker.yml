@@ -1,0 +1,18 @@
+- hosts: public_routable
+  tasks:
+  - name: Enable lvm services
+    service: state=started enabled=yes name={{item}}
+    with_items:
+    - lvm2-lvmetad
+    - lvm2-lvmpolld
+
+  - name: Create docker-storage-setup file
+    blockinfile:
+      path: /etc/sysconfig/docker-storage-setup
+      block: |
+        DEVS=/dev/vdb
+        VG=docker-vg
+ 
+  - name: Execute docker-storage-setup
+    shell: docker-storage-setup
+  
