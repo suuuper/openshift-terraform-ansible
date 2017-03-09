@@ -12,6 +12,7 @@ variable "master_image_id" {}
 variable "master_instance_size" {}
 variable "node_image_id" {}
 variable "node_instance_size" {}
+variable "external_gateway" {}
 
 
 provider "openstack" {
@@ -21,6 +22,30 @@ provider "openstack" {
     password  = "${var.openstack_password}"
     auth_url  = "${var.openstack_auth_url}"
     endpoint_type = "public"
+}
+
+resource "openstack_networking_network_v2" "terraform" {
+  name           = "terraform"
+  admin_state_up = "true"
+}
+
+resource "openstack_networking_subnet_v2" "terraform" {
+  name            = "terraform"
+  network_id      = "${openstack_networking_network_v2.terraform.id}"
+  cidr            = "172.23.0.0/24"
+  ip_version      = 4
+  dns_nameservers = ["8.8.8.8", "8.8.4.4"]
+}
+
+resource "openstack_networking_router_v2" "terraform" {
+  name             = "terraform"
+  admin_state_up   = "true"
+  external_gateway = "${var.external_gateway}"
+}
+
+resource "openstack_networking_router_interface_v2" "terraform" {
+  router_id = "${openstack_networking_router_v2.terraform.id}"
+  subnet_id = "${openstack_networking_subnet_v2.terraform.id}"
 }
 
 resource "openstack_compute_secgroup_v2" "os3-sec-group" {
@@ -154,12 +179,14 @@ resource "openstack_blockstorage_volume_v1" "master-docker-vol" {
   count = "${var.master_num_nodes}"
   name = "mastervol${count.index}"
   size = 5 
+  volume_type = "ceph-ssd"
 }
 
 resource "openstack_blockstorage_volume_v1" "node-docker-vol" {
   count = "${var.num_nodes}"
   name = "${format("%.24s", "node-docker-vol${count.index}")}"
   size = 10
+  volume_type = "ceph-ssd"
 }
 
 
